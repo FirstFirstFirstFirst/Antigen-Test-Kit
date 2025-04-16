@@ -7,8 +7,8 @@ export const SignUpValidator = z
       .string()
       .email("Invalid email address")
       .refine(
-        (email) => email.endsWith("beryllor.com"),
-        "Must use university email (beryllor.com)"
+        (email) => email.endsWith("phuket.psu.ac.th"),
+        "Must use university email (phuket.psu.ac.th)"
       ),
     password: z
       .string()
@@ -39,8 +39,8 @@ export const ForgotPasswordValidator = z.object({
     .string()
     .email("Invalid email address")
     .refine(
-      (email) => email.endsWith("beryllor.com"),
-      "Must use university email (beryllor.com)"
+      (email) => email.endsWith("phuket.psu.ac.th"),
+      "Must use university email (phuket.psu.ac.th)"
     ),
 });
 

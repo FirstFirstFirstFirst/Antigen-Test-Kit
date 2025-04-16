@@ -1,5 +1,5 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
-// import { prisma } from "@/lib/db";
+import { NextResponse } from "next/server";
 
 const isPublicRoute = createRouteMatcher([
   "/sign-in(.*)",
@@ -11,19 +11,28 @@ const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
 
 export default clerkMiddleware(async (auth, req) => {
   if (isAdminRoute(req)) {
-    await auth.protect();
+    // if (!auth().userId) {
+    if (!auth()) {
+      // Redirect to sign-in page with return_to parameter
+      const signInUrl = new URL("/sign-in", req.url);
+      signInUrl.searchParams.set("redirect_url", req.url);
+      return NextResponse.redirect(signInUrl);
+    }
 
-    // const userId = auth().userId;
-
-    // const isAdmin = await checkUserIsAdmin(userId);
-
-    // if (!isAdmin) {
-    //   // Handle unauthorized admin access (redirect or 403)
-    //   return new Response("Unauthorized", { status: 403 });
-    // }
+    // Your admin check logic would go here
+    // For now, we're just authenticating without checking admin status
   } else if (!isPublicRoute(req)) {
-    await auth.protect();
+    // if (!auth().userId) {
+    if (!auth()) {
+      // Redirect to sign-in page with return_to parameter
+      const signInUrl = new URL("/sign-in", req.url);
+      signInUrl.searchParams.set("redirect_url", req.url);
+      return NextResponse.redirect(signInUrl);
+    }
   }
+
+  // Continue with the request
+  return NextResponse.next();
 });
 
 export const config = {

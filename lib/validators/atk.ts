@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export const ATKSubmissionValidator = z.object({
+  email: z.string({ required_error: "Email is required" }),
   result: z.enum(["Positive", "Negative"], {
     required_error: "Please select a test result",
   }),

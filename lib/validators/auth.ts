@@ -3,13 +3,11 @@ import { z } from "zod";
 // Sign-up schema
 export const SignUpValidator = z
   .object({
-    email: z
-      .string()
-      .email("Invalid email address")
-      .refine(
-        (email) => email.endsWith("phuket.psu.ac.th"),
-        "Must use university email (phuket.psu.ac.th)"
-      ),
+    email: z.string().email("Invalid email address"),
+    // .refine(
+    //   (email) => email.endsWith("phuket.psu.ac.th"),
+    //   "Must use university email (phuket.psu.ac.th)"
+    // ),
     password: z
       .string()
       .min(8, "Password must be at least 8 characters")
@@ -35,13 +33,11 @@ export const SignInValidator = z.object({
 
 // Password reset schema
 export const ForgotPasswordValidator = z.object({
-  email: z
-    .string()
-    .email("Invalid email address")
-    .refine(
-      (email) => email.endsWith("phuket.psu.ac.th"),
-      "Must use university email (phuket.psu.ac.th)"
-    ),
+  email: z.string().email("Invalid email address"),
+  // .refine(
+  //   (email) => email.endsWith("phuket.psu.ac.th"),
+  //   "Must use university email (phuket.psu.ac.th)"
+  // ),
 });
 
 // Reset password schema

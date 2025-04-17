@@ -117,9 +117,8 @@ export default function Dashboard() {
     setIsSubmitting(true);
 
     try {
-      // Here you would send the data to your API
       console.log("Submitting data:", data);
-
+      //TODO api with prisma
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1500));
 

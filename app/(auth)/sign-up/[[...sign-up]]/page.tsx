@@ -71,10 +71,24 @@ export default function SignUpForm() {
     } catch (err) {
       console.error(JSON.stringify(err, null, 2));
       const clerkError = err as { errors?: Array<{ longMessage?: string }> };
-      setError(
+
+      // Get the original error message
+      const originalMessage =
         clerkError.errors?.[0]?.longMessage ||
-          "An error occurred during sign-up"
-      );
+        "An error occurred during sign-up";
+
+      // Check if the message starts with the specific text
+      if (
+        originalMessage.startsWith(
+          "Password has been found in an online data breach"
+        )
+      ) {
+        setError(
+          "This password is not secure enough. Please choose a different one."
+        );
+      } else {
+        setError(originalMessage);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -183,7 +197,7 @@ export default function SignUpForm() {
               </Button>
             </form>
           </CardContent>
-          <CardFooter className="text-center text-sm">
+          <CardFooter className="text-center text-sm ml-1">
             {`Didn't receive a code?`}{" "}
             <button
               onClick={async () => {
@@ -234,7 +248,7 @@ export default function SignUpForm() {
               <Input
                 id="email"
                 type="email"
-                placeholder="yourname@beryllor.com"
+                placeholder="example-email@phuket.psu.ac.th"
                 className="w-full"
                 {...register("email")}
               />

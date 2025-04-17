@@ -144,9 +144,26 @@ const ForgotPasswordPage: NextPage = () => {
         router.push("/dashboard");
       }
     } catch (err) {
+      console.error(JSON.stringify(err, null, 2));
       const clerkError = err as { errors?: Array<{ longMessage?: string }> };
-      console.error("error", clerkError.errors?.[0]?.longMessage);
-      setError(clerkError.errors?.[0]?.longMessage || "An error occurred");
+
+      // Get the original error message
+      const originalMessage =
+        clerkError.errors?.[0]?.longMessage ||
+        "An error occurred during sign-up";
+
+      // Check if the message starts with the specific text
+      if (
+        originalMessage.startsWith(
+          "Password has been found in an online data breach"
+        )
+      ) {
+        setError(
+          "This password is not secure enough. Please choose a different one."
+        );
+      } else {
+        setError(originalMessage);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -193,7 +210,7 @@ const ForgotPasswordPage: NextPage = () => {
                 </label>
                 <Input
                   id="email"
-                  placeholder="yourname@beryllor.com"
+                  placeholder="example-email@phuket.psu.ac.th"
                   className="w-full"
                   {...registerEmail("email")}
                 />

@@ -31,6 +31,7 @@ const ForgotPasswordPage: NextPage = () => {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [code, setCode] = useState("");
+  const [userEmail, setUserEmail] = useState(""); // Store email for password update
 
   const router = useRouter();
   const { isSignedIn } = useAuth();
@@ -41,7 +42,6 @@ const ForgotPasswordPage: NextPage = () => {
     register: registerEmail,
     handleSubmit: handleSubmitEmail,
     formState: { errors: emailErrors },
-    // watch,
   } = useForm<ForgotPasswordRequest>({
     resolver: zodResolver(ForgotPasswordValidator),
     defaultValues: {
@@ -54,7 +54,6 @@ const ForgotPasswordPage: NextPage = () => {
     register: registerReset,
     handleSubmit: handleSubmitReset,
     formState: { errors: resetErrors },
-    // watch: watchReset,
   } = useForm<ResetPasswordRequest>({
     resolver: zodResolver(ResetPasswordValidator),
     defaultValues: {
@@ -62,8 +61,6 @@ const ForgotPasswordPage: NextPage = () => {
       confirmPassword: "",
     },
   });
-
-  // const emailValue = watch("email");
 
   useEffect(() => {
     if (isSignedIn) {
@@ -83,6 +80,7 @@ const ForgotPasswordPage: NextPage = () => {
   async function createResetRequest(data: ForgotPasswordRequest) {
     setIsLoading(true);
     setError("");
+    setUserEmail(data.email); // Store email for later use
 
     try {
       await signIn?.create({
@@ -106,6 +104,7 @@ const ForgotPasswordPage: NextPage = () => {
     setError("");
 
     try {
+      // First reset password with Clerk
       const result = await signIn?.attemptFirstFactor({
         strategy: "reset_password_email_code",
         code,
@@ -115,7 +114,32 @@ const ForgotPasswordPage: NextPage = () => {
       if (result?.status === "needs_second_factor") {
         setSecondFactor(true);
       } else if (result?.status === "complete" && setActive) {
-        // Set the active session to the newly created session (user is now signed in)
+        // Now also update the password in our database
+        try {
+          const response = await fetch("/api/users/password", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: userEmail,
+              newPassword: data.password,
+            }),
+          });
+
+          const updateResult = await response.json();
+
+          if (!updateResult.success) {
+            console.error(
+              "Failed to update password in database:",
+              updateResult.error
+            );
+            // Continue with session activation even if database update fails
+          }
+        } catch (dbErr) {
+          console.error("Error updating password in database:", dbErr);
+          // Continue with session activation even if database update fails
+        }
+
+        // Set the active session and redirect
         await setActive({ session: result.createdSessionId });
         router.push("/dashboard");
       }

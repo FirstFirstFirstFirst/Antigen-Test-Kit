@@ -26,13 +26,13 @@ export default function SignUpForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [email, setEmail] = useState(""); // Store email for verification step
+  const [password, setPassword] = useState(""); // Store password for database save
   const router = useRouter();
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-    // watch,
   } = useForm<SignUpRequest>({
     resolver: zodResolver(SignUpValidator),
     defaultValues: {
@@ -42,8 +42,6 @@ export default function SignUpForm() {
     },
   });
 
-  // const password = watch("password");
-
   // Handle submission of the sign-up form
   const onSubmit = async (data: SignUpRequest) => {
     setError("");
@@ -51,8 +49,9 @@ export default function SignUpForm() {
 
     if (!isLoaded) return;
 
-    // Store email for verification step
+    // Store email and password for later use
     setEmail(data.email);
+    setPassword(data.password);
 
     // Start the sign-up process using the email and password provided
     try {
@@ -95,10 +94,37 @@ export default function SignUpForm() {
         code,
       });
 
-      // If verification was completed, set the session to active
-      // and redirect the user
+      // If verification was completed, set the session to active and save user to database
       if (signUpAttempt.status === "complete") {
+        // First set the active session with Clerk
         await setActive({ session: signUpAttempt.createdSessionId });
+
+        // Then save the user data to our database
+        try {
+          const response = await fetch("/api/users", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: email,
+              password: password,
+              firstName: "", // Add these fields if you collect them during signup
+              lastName: "",
+              clerkUserId: signUpAttempt.createdUserId,
+            }),
+          });
+
+          const data = await response.json();
+
+          if (!data.success) {
+            console.error("Failed to save user to database:", data.error);
+            // Continue with redirect even if database save fails
+          }
+        } catch (dbErr) {
+          console.error("Error saving user to database:", dbErr);
+          // Continue with redirect even if database save fails
+        }
+
+        // Redirect user to dashboard
         router.push("/dashboard");
       } else {
         // If the status is not complete, check why. User may need to
@@ -267,13 +293,8 @@ export default function SignUpForm() {
               <div id="clerk-captcha"></div>
             </div>
 
-            <Button
-              type="submit"
-              className="w-full"
-              // disabled={isLoading}
-            >
-              {/* {isLoading ? "Creating account..." : "Create account"} */}
-              Next
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Creating account..." : "Next"}
             </Button>
           </form>
         </CardContent>

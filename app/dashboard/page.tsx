@@ -30,8 +30,15 @@ import {
   Clock,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -43,12 +50,13 @@ import {
 import Image from "next/image";
 import { format } from "@/lib/format";
 import { useUser } from "@clerk/nextjs";
+import { toast } from "sonner";
+
 export default function Dashboard() {
   const { user } = useUser();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitSuccess, setSubmitSuccess] = useState(false);
-  const [submitError, setSubmitError] = useState("");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   // Example history data - would be fetched from API in real implementation
   const submissionHistory = [
@@ -80,9 +88,33 @@ export default function Dashboard() {
     },
   });
 
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      setImagePreview(null);
+      return;
+    }
+
+    // Validate file size (2MB max)
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("File size exceeds 2MB limit");
+      setImagePreview(null);
+      return;
+    }
+
+    // Create file preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+
+    // Update form value
+    setValue("image", file);
+  };
+
   const onSubmit = async (data: ATKSubmissionRequest) => {
     setIsSubmitting(true);
-    setSubmitError("");
 
     try {
       // Here you would send the data to your API
@@ -92,17 +124,15 @@ export default function Dashboard() {
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
       // On success
-      setSubmitSuccess(true);
+
+      toast.success("Your ATK test result has been submitted successfully.");
       reset();
       setImagePreview(null);
 
       // Reset success message after 5 seconds
-      setTimeout(() => {
-        setSubmitSuccess(false);
-      }, 5000);
     } catch (error) {
       console.error("Error submitting ATK result:", error);
-      setSubmitError(
+      toast.error(
         "There was an error submitting your ATK result. Please try again."
       );
     } finally {
@@ -140,24 +170,6 @@ export default function Dashboard() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {submitSuccess && (
-                  <Alert className="mb-6 bg-green-50 text-green-700 border-green-200">
-                    <CheckCircle2 className="h-4 w-4" />
-                    <AlertTitle>Success!</AlertTitle>
-                    <AlertDescription>
-                      Your ATK test result has been submitted successfully.
-                    </AlertDescription>
-                  </Alert>
-                )}
-
-                {submitError && (
-                  <Alert className="mb-6 bg-red-50 text-red-700 border-red-200">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertTitle>Error</AlertTitle>
-                    <AlertDescription>{submitError}</AlertDescription>
-                  </Alert>
-                )}
-
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                   <div className="space-y-4">
                     <div>
@@ -199,28 +211,91 @@ export default function Dashboard() {
                       <Label htmlFor="image" className="text-base">
                         Verification Image
                       </Label>
+
                       <div className="border-2 border-dashed rounded-lg p-4 transition-colors hover:border-primary/50 hover:bg-muted/50">
-                        <div
-                          className={`flex flex-col items-center justify-center gap-1 ${
-                            imagePreview ? "pb-4" : "py-4"
-                          }`}
-                        >
-                          <Upload className="h-8 w-8 text-muted-foreground mb-2" />
-                          <div className="flex flex-col items-center gap-1 text-center">
-                            <p className="text-sm font-medium">
-                              Drag or click to upload
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              JPG, PNG, or HEIC (max 2MB)
-                            </p>
-                          </div>
+                        <div className="flex flex-col items-center justify-center gap-1 py-4">
+                          {!imagePreview && (
+                            <Upload className="h-8 w-8 text-muted-foreground mb-2" />
+                          )}
+                          {!imagePreview && (
+                            <div className="flex flex-col items-center gap-1 text-center">
+                              <p className="text-sm font-medium">
+                                Click to upload
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                JPG, PNG, or HEIC (max 2MB)
+                              </p>
+                            </div>
+                          )}
+
                           <Input
                             id="image"
                             type="file"
                             accept=".jpg,.jpeg,.png,.heic"
                             className="hidden"
-                            {...register("image")}
+                            {...register("image", {
+                              onChange: handleFileChange,
+                            })}
                           />
+                          {imagePreview && (
+                            <>
+                              <div className="mt-2 relative">
+                                <Image
+                                  src={imagePreview}
+                                  alt="ATK Test Preview"
+                                  className="rounded-md max-h-48 mx-auto cursor-pointer"
+                                  width={200}
+                                  height={200}
+                                  onClick={() => setIsDialogOpen(true)}
+                                />
+                                <Button
+                                  type="button"
+                                  variant="secondary"
+                                  size="icon"
+                                  className="absolute top-2 right-2 h-6 w-6 rounded-full bg-black/50 hover:bg-black/70"
+                                  onClick={() => {
+                                    setValue(
+                                      "image",
+                                      undefined as unknown as File
+                                    );
+                                    setImagePreview(null);
+                                  }}
+                                >
+                                  ✕
+                                </Button>
+                              </div>
+
+                              <Dialog
+                                open={isDialogOpen}
+                                onOpenChange={setIsDialogOpen}
+                              >
+                                <DialogContent className="sm:max-w-lg">
+                                  <DialogHeader>
+                                    <DialogTitle>ATK Test Image</DialogTitle>
+                                    <DialogDescription>
+                                      Preview of your uploaded ATK test result
+                                    </DialogDescription>
+                                  </DialogHeader>
+                                  <div className="flex items-center justify-center p-6">
+                                    <Image
+                                      src={imagePreview}
+                                      alt="ATK Test Full Preview"
+                                      className="max-w-full max-h-[70vh] object-contain"
+                                      width={800}
+                                      height={800}
+                                    />
+                                  </div>
+                                  <DialogFooter>
+                                    <Button
+                                      onClick={() => setIsDialogOpen(false)}
+                                    >
+                                      Close
+                                    </Button>
+                                  </DialogFooter>
+                                </DialogContent>
+                              </Dialog>
+                            </>
+                          )}
                           <Button
                             type="button"
                             variant="secondary"
@@ -230,31 +305,9 @@ export default function Dashboard() {
                               document.getElementById("image")?.click()
                             }
                           >
-                            Browse Files
+                            {imagePreview ? "Change File" : "Browse Files"}
                           </Button>
                         </div>
-
-                        {imagePreview && (
-                          <div className="mt-2 relative">
-                            <Image
-                              src={imagePreview}
-                              alt="ATK Test Preview"
-                              className="rounded-md max-h-48 mx-auto"
-                            />
-                            <Button
-                              type="button"
-                              variant="secondary"
-                              size="icon"
-                              className="absolute top-2 right-2 h-6 w-6 rounded-full bg-black/50 hover:bg-black/70"
-                              onClick={() => {
-                                setValue("image", undefined as unknown as File);
-                                setImagePreview(null);
-                              }}
-                            >
-                              ✕
-                            </Button>
-                          </div>
-                        )}
                       </div>
 
                       {errors.image && (

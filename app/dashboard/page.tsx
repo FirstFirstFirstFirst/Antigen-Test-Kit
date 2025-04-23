@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -57,22 +57,42 @@ export default function Dashboard() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  useEffect(() => {
+    fetchHistory();
+    fetchStats();
+  }, [user]);
 
-  // Example history data - would be fetched from API in real implementation
-  const submissionHistory = [
-    { id: 1, date: "2025-04-15T08:30:00", result: "Negative" },
-    { id: 2, date: "2025-04-02T09:45:00", result: "Negative" },
-    { id: 3, date: "2025-03-20T14:20:00", result: "Positive" },
-    { id: 4, date: "2025-03-05T11:10:00", result: "Negative" },
-  ];
+  // // Example history data - would be fetched from API in real implementation
+  // const submissionHistory = [
+  //   { id: 1, date: "2025-04-15T08:30:00", result: "Negative" },
+  //   { id: 2, date: "2025-04-02T09:45:00", result: "Negative" },
+  //   { id: 3, date: "2025-03-20T14:20:00", result: "Positive" },
+  //   { id: 4, date: "2025-03-05T11:10:00", result: "Negative" },
+  // ];
 
-  // Current stats - would be fetched from API
-  const stats = {
-    totalTests: 482,
-    positiveRate: 3.2,
-    lastSubmission: "2025-04-15T08:30:00",
-    streak: 12,
-  };
+  // // Current stats - would be fetched from API
+  // const stats = {
+  //   totalTests: 482,
+  //   positiveRate: 3.2,
+  //   lastSubmission: "2025-04-15T08:30:00",
+  //   streak: 12,
+  // };
+  // Live data from your API:
+  const [submissionHistory, setSubmissionHistory] = useState<
+    { id: string; date: string; result: string; imageUrl: string }[]
+  >([]);
+  const [stats, setStats] = useState<{
+    totalTests: number;
+    positiveRate: number;
+    lastSubmission: string | null;
+    streak: number;
+  }>({
+    totalTests: 0,
+    positiveRate: 0,
+    lastSubmission: null,
+    streak: 0,
+  });
+
 
   const {
     register,
@@ -150,6 +170,8 @@ export default function Dashboard() {
       toast.success("Your ATK test result has been submitted successfully.");
       reset();
       setImagePreview(null);
+      await fetchHistory();
+      await fetchStats();
 
       // TODO: refetch history/stats here if desired
 
@@ -160,6 +182,29 @@ export default function Dashboard() {
       setIsSubmitting(false);
     }
   };
+
+  // Helper to load history
+  const fetchHistory = async () => {
+    if (!user?.primaryEmailAddress?.emailAddress) return;
+    const res = await fetch(
+      `/api/atk-results/history?email=${encodeURIComponent(
+        user.primaryEmailAddress.emailAddress
+      )}`
+    );
+    if (res.ok) setSubmissionHistory(await res.json());
+  };
+
+  // Helper to load stats
+  const fetchStats = async () => {
+    if (!user?.primaryEmailAddress?.emailAddress) return;
+    const res = await fetch(
+      `/api/atk-results/stats?email=${encodeURIComponent(
+        user.primaryEmailAddress.emailAddress
+      )}`
+    );
+    if (res.ok) setStats(await res.json());
+  };
+
 
   return (
     <div className="container mx-auto py-6 space-y-6 min-h-screen pt-24">
@@ -542,14 +587,19 @@ export default function Dashboard() {
                 <div className="flex items-center">
                   <Calendar className="h-5 w-5 text-muted-foreground mr-2" />
                   <div className="text-2xl font-bold">
-                    {format(new Date(stats.lastSubmission), "MMM d")}
+                    {stats.lastSubmission
+                      ? format(new Date(stats.lastSubmission), "MMM d")
+                      : "—"}
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {format(new Date(stats.lastSubmission), "h:mm a")}
+                  {stats.lastSubmission
+                    ? format(new Date(stats.lastSubmission), "h:mm a")
+                    : ""}
                 </p>
               </CardContent>
             </Card>
+
 
             <Card>
               <CardHeader className="pb-2">

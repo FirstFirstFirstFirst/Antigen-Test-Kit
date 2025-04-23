@@ -117,23 +117,45 @@ export default function Dashboard() {
     setIsSubmitting(true);
 
     try {
-      console.log("Submitting data:", data);
-      //TODO api with prisma
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // Build FormData
+      const formData = new FormData();
+      formData.append("file", data.image!);
 
-      // On success
+      // Fallback to Clerk’s user email if data.email is blank
+      const emailToSend =
+        data.email?.trim() ||
+        user?.primaryEmailAddress?.emailAddress ||
+        "";
+      formData.append("email", emailToSend);
 
+      formData.append("result", data.result);
+
+      // DEBUG: log exactly what we’re sending
+      for (let [k, v] of formData.entries()) {
+        console.log("→ formData", k, v);
+      }
+
+      // Fire the request
+      const res = await fetch("/api/atk-results", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || res.statusText);
+      }
+
+      // Success!
       toast.success("Your ATK test result has been submitted successfully.");
       reset();
       setImagePreview(null);
 
-      // Reset success message after 5 seconds
-    } catch (error) {
+      // TODO: refetch history/stats here if desired
+
+    } catch (error: any) {
       console.error("Error submitting ATK result:", error);
-      toast.error(
-        "There was an error submitting your ATK result. Please try again."
-      );
+      toast.error(error.message || "Failed to submit. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -316,7 +338,11 @@ export default function Dashboard() {
                       )}
                     </div>
                   </div>
-
+                  <input
+                    type="hidden"
+                    {...register("email")}
+                    value={user?.primaryEmailAddress?.emailAddress || ""}
+                  />
                   <Button
                     type="submit"
                     className="w-full"

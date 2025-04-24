@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -41,26 +41,62 @@ import {
 } from "@/components/ui/select";
 
 import { endOfWeek, format, startOfWeek } from "@/lib/format";
-import {
-  calculateWeeklyStats,
-  generateMockData,
-  Submission,
-  WeeklyStats,
-} from "@/lib/mock-atk";
+// import {
+//   calculateWeeklyStats,
+//   generateMockData,
+//   Submission,
+//   WeeklyStats,
+// } from "@/lib/mock-atk";
 
 import { exportToExcel, exportToPDF } from "@/lib/report";
 import { TrendsTabContent } from "@/components/trends-tab-content";
 import { ExportDropdown } from "@/components/export-dropdown";
 
-// Generate mock data and calculate weekly stats
-const mockSubmissions: Submission[] = generateMockData(100);
-const weeklyStats: WeeklyStats = calculateWeeklyStats(mockSubmissions);
+// // Generate mock data and calculate weekly stats
+// const mockSubmissions: Submission[] = generateMockData(100);
+// const weeklyStats: WeeklyStats = calculateWeeklyStats(mockSubmissions);
 
 export default function AdminReportPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [dateRange, setDateRange] = useState("week");
   const [isExporting, setIsExporting] = useState(false);
+  const [submissions, setSubmissions] = useState<any[]>([]);
+  const [stats, setStats] = useState<{
+    dayCount: number;
+    weekCount: number;
+    monthCount: number;
+    weeklyStats: {
+      totalSubmissions: number;
+      positiveTests: number;
+      positiveRate: number;
+      pendingVerification: number;
+      missedSubmissions: number;
+    };
+  }>({
+    dayCount: 0,
+    weekCount: 0,
+    monthCount: 0,
+    weeklyStats: {
+      totalSubmissions: 0,
+      positiveTests: 0,
+      positiveRate: 0,
+      pendingVerification: 0,
+      missedSubmissions: 0,
+    },
+  });
+
+
+  // fetch real data on mount
+  useEffect(() => {
+    fetch("/api/admin/atk-results")
+      .then(res => res.json())
+      .then((payload) => {
+        setSubmissions(payload.submissions);
+        setStats(payload.stats);
+      })
+      .catch(console.error);
+  }, []);
 
   // Get current date range for display
   const startDate = startOfWeek(new Date());
@@ -69,20 +105,40 @@ export default function AdminReportPage() {
     endDate,
     "MMM d, yyyy"
   )}`;
+  
+  // compute cut-offs for today, this week and this month
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfThisWeek = startOfWeek(now);
+  const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-  // Filter submissions based on search and filter
-  const filteredSubmissions = mockSubmissions.filter((sub) => {
+
+  // Filter submissions based on dateRange, then search+status
+  const filteredSubmissions = submissions.filter((sub) => {
+    const subDate = new Date(sub.date);
+
+    // 1) date‐range check
+    let inRange = true;
+    if (dateRange === "today") {
+      inRange = subDate >= startOfToday;
+    } else if (dateRange === "week") {
+      inRange = subDate >= startOfThisWeek && subDate <= endOfWeek(now);
+    } else if (dateRange === "month") {
+      inRange = subDate >= startOfThisMonth;
+    }
+    if (!inRange) return false;
+
+    // 2) text search
     const matchesSearch =
       sub.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       sub.email.toLowerCase().includes(searchTerm.toLowerCase());
 
-    if (filterStatus === "all") return matchesSearch;
-    if (filterStatus === "positive")
-      return matchesSearch && sub.result === "Positive";
-    if (filterStatus === "negative")
-      return matchesSearch && sub.result === "Negative";
+    if (!matchesSearch) return false;
 
-    return matchesSearch;
+    // 3) status filter
+    if (filterStatus === "positive") return sub.result === "Positive";
+    if (filterStatus === "negative") return sub.result === "Negative";
+    return true; // "all"
   });
 
   const handleExport = (format: string) => {
@@ -94,7 +150,7 @@ export default function AdminReportPage() {
       if (format === "XLSX") {
         fileName = exportToExcel(filteredSubmissions);
       } else if (format === "PDF") {
-        fileName = exportToPDF(filteredSubmissions, weeklyStats);
+        fileName = exportToPDF(filteredSubmissions, stats.weeklyStats);
       }
 
       setIsExporting(false);
@@ -135,7 +191,7 @@ export default function AdminReportPage() {
             <div className="flex items-center">
               <Users className="h-5 w-5 text-muted-foreground mr-2" />
               <div className="text-2xl font-bold">
-                {weeklyStats.totalSubmissions}
+                {stats.weeklyStats.totalSubmissions}
               </div>
             </div>
             <p className="text-xs text-muted-foreground mt-1">This week</p>
@@ -152,13 +208,13 @@ export default function AdminReportPage() {
             <div className="flex items-center">
               <AlertTriangle className="h-5 w-5 text-red-500 mr-2" />
               <div className="text-2xl font-bold">
-                {weeklyStats.positiveTests}
+                {stats.weeklyStats.positiveTests}
               </div>
               <Badge
                 variant="outline"
                 className="ml-2 text-xs bg-red-50 border-red-200 text-red-700"
               >
-                {weeklyStats.positiveRate}%
+                {stats.weeklyStats.positiveRate}%
               </Badge>
             </div>
             <p className="text-xs text-muted-foreground mt-1">This week</p>
@@ -175,7 +231,7 @@ export default function AdminReportPage() {
             <div className="flex items-center">
               <RefreshCcw className="h-5 w-5 text-amber-500 mr-2" />
               <div className="text-2xl font-bold">
-                {weeklyStats.pendingVerification}
+                {stats.weeklyStats.pendingVerification}
               </div>
             </div>
             <p className="text-xs text-muted-foreground mt-1">Require review</p>
@@ -192,7 +248,7 @@ export default function AdminReportPage() {
             <div className="flex items-center">
               <Bell className="h-5 w-5 text-amber-500 mr-2" />
               <div className="text-2xl font-bold">
-                {weeklyStats.missedSubmissions}
+                {stats.weeklyStats.missedSubmissions}
               </div>
             </div>
             {/* <p className="text-xs text-muted-foreground mt-1">Reminders sent</p> */}
@@ -298,9 +354,10 @@ export default function AdminReportPage() {
                               <AvatarFallback>
                                 {submission.name
                                   .split(" ")
-                                  .map((n) => n[0])
+                                  .map((n: string) => n[0])
                                   .join("")}
                               </AvatarFallback>
+
                             </Avatar>
                             <div>
                               <p className="text-sm font-medium">
@@ -370,7 +427,7 @@ export default function AdminReportPage() {
             </CardContent>
           </TabsContent>
 
-          <TrendsTabContent submissions={mockSubmissions} />
+          <TrendsTabContent submissions={submissions} />
         </Card>
       </Tabs>
     </div>

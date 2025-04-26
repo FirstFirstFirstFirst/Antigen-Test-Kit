@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
   });
 
   // 1) Extract ISO date strings, remove duplicates
-  const dateStrings: string[] = results.map((r: any) =>
+  const dateStrings: string[] = results.map((r) =>
     (r.createdAt as Date).toISOString().split("T")[0]
   );
   const days: string[] = Array.from(new Set(dateStrings));
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
 
   // 3) Compute overall stats
   const totalTests = results.length;
-  const positiveCount = results.filter((r: any) => r.result === "Positive").length;
+  const positiveCount = results.filter((r) => r.result === "Positive").length;
   const positiveRate = totalTests > 0 ? (positiveCount / totalTests) * 100 : 0;
 
   return NextResponse.json({ totalTests, positiveRate, lastSubmission, streak });

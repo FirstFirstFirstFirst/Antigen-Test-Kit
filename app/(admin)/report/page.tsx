@@ -61,7 +61,7 @@ export default function AdminReportPage() {
   const [filterStatus, setFilterStatus] = useState("all");
   const [dateRange, setDateRange] = useState("week");
   const [isExporting, setIsExporting] = useState(false);
-  const [submissions, setSubmissions] = useState<any[]>([]);
+  const [submissions, setSubmissions] = useState([]);
   const [stats, setStats] = useState<{
     dayCount: number;
     weekCount: number;

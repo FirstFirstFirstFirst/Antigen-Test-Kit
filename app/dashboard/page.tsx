@@ -1,5 +1,5 @@
 "use client";
-
+export const dynamic = 'force-dynamic';
 import { useState, useEffect } from "react";
 import {
   Card,
@@ -60,7 +60,7 @@ export default function Dashboard() {
   useEffect(() => {
     fetchHistory();
     fetchStats();
-  }, [user]);
+  });
 
   // // Example history data - would be fetched from API in real implementation
   // const submissionHistory = [
@@ -147,10 +147,10 @@ export default function Dashboard() {
 
       formData.append("result", data.result);
 
-      // DEBUG: log exactly what we’re sending
-      for (let [k, v] of formData.entries()) {
-        console.log("→ formData", k, v);
-      }
+      // // DEBUG: log exactly what we’re sending
+      // for (let [k, v] of formData.entries()) {
+      //   console.log("→ formData", k, v);
+      // }
 
       // Fire the request
       const res = await fetch("/api/atk-results", {
@@ -170,8 +170,7 @@ export default function Dashboard() {
       await fetchHistory();
       await fetchStats();
 
-      // TODO: refetch history/stats here if desired
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error submitting ATK result:", error);
       toast.error(error.message || "Failed to submit. Please try again.");
     } finally {

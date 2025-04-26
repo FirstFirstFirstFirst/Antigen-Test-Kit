@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
   });
 
   // Here we explicitly type `r` as `any` to satisfy TS
-  const data = results.map((r: any) => ({
+  const data = results.map((r) => ({
     id:       r.id as string,
     date:     (r.createdAt as Date).toISOString(),
     result:   r.result as string,

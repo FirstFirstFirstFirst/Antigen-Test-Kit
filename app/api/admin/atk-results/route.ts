@@ -1,5 +1,5 @@
 // app/api/admin/atk-results/route.ts
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import {
   calculateWeeklyStats,
@@ -7,7 +7,7 @@ import {
   type WeeklyStats,
 } from "@/lib/mock-atk";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   // 1) Fetch all ATK results with user info
   const results = await prisma.aTKResult.findMany({
     include: { user: true },

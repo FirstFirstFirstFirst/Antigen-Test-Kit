@@ -34,12 +34,21 @@ export const ExportDropdown = ({
         <ChevronDown className="h-4 w-4 ml-1" />
       </Button>
     </DropdownMenuTrigger>
-    <DropdownMenuContent align="end">
-      <DropdownMenuItem onClick={() => handleExport("XLSX")}>
+    <DropdownMenuContent
+      align="end"
+      className="bg-black border rounded-md shadow-lg min-w-[200px] p-1"
+    >
+      <DropdownMenuItem
+        onClick={() => handleExport("XLSX")}
+        className="flex items-center px-3 py-2 text-sm rounded cursor-pointer"
+      >
         <FileSpreadsheet className="h-4 w-4 mr-2" />
         Export as Excel
       </DropdownMenuItem>
-      <DropdownMenuItem onClick={() => handleExport("PDF")}>
+      <DropdownMenuItem
+        onClick={() => handleExport("PDF")}
+        className="flex items-center px-3 py-2 text-sm rounded cursor-pointer"
+      >
         <FileMinus className="h-4 w-4 mr-2" />
         Export as PDF
       </DropdownMenuItem>

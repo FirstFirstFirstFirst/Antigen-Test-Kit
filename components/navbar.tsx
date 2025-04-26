@@ -4,12 +4,14 @@ import { useState, useEffect } from "react";
 import { SignedIn, SignedOut, UserButton, useAuth } from "@clerk/nextjs";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Menu } from "lucide-react";
+import { FileBarChart, Menu } from "lucide-react";
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { isLoaded } = useAuth();
+  const { sessionClaims, isLoaded } = useAuth();
+  const role = (sessionClaims?.o as { rol?: string })?.rol || "member";
+  const isAdmin = role === "admin";
 
   // Add scroll effect for navbar
   useEffect(() => {
@@ -58,6 +60,14 @@ export function Navbar() {
                   >
                     Dashboard
                   </Link>
+                  {isAdmin && (
+                    <Link
+                      href="/report"
+                      className="text-sm font-medium bg-primary text-primary-foreground px-3 py-1.5 rounded-md hover:bg-primary/90 transition-all flex items-center gap-1 shadow-sm"
+                    >
+                      <FileBarChart size={16} /> Admin Reports
+                    </Link>
+                  )}
                   <UserButton afterSignOutUrl="/" />
                 </div>
               </SignedIn>
@@ -112,6 +122,14 @@ export function Navbar() {
                     >
                       Dashboard
                     </Link>
+                    {isAdmin && (
+                      <Link
+                        href="/report"
+                        className="text-sm font-bold text-primary hover:text-primary/80 transition-colors flex items-center gap-1"
+                      >
+                        <FileBarChart size={16} /> Admin Reports
+                      </Link>
+                    )}
                     <div className="flex items-center mt-2 p-2">
                       <span className="mr-2 text-sm font-medium">
                         Your Account

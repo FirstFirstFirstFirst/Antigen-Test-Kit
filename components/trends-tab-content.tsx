@@ -1,6 +1,6 @@
 import { generateTrendData, generateDistributionData } from "@/lib/report";
 import { TabsContent } from "@radix-ui/react-tabs";
-import { Mail } from "lucide-react";
+
 import {
   CartesianGrid,
   XAxis,
@@ -12,14 +12,15 @@ import {
   LineChart,
   PieChart,
 } from "recharts";
-import { Button } from "./ui/button";
+// import { Mail } from "lucide-react";
+// import { Button } from "./ui/button";
 import {
   CardContent,
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardFooter,
+  // Card,
+  // CardHeader,
+  // CardTitle,
+  // CardDescription,
+  // CardFooter,
 } from "./ui/card";
 import {
   ChartConfig,
@@ -130,7 +131,7 @@ export const TrendsTabContent = ({ submissions }: TrendsTabContentProps) => {
           </div>
         </div>
 
-        <div className="mt-8">
+        {/* <div className="mt-8">
           <h3 className="text-lg font-medium mb-4">
             Weekly Email Report Summary
           </h3>
@@ -162,7 +163,7 @@ export const TrendsTabContent = ({ submissions }: TrendsTabContentProps) => {
               </Button>
             </CardFooter>
           </Card>
-        </div>
+        </div> */}
       </CardContent>
     </TabsContent>
   );

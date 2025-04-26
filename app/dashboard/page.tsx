@@ -93,7 +93,6 @@ export default function Dashboard() {
     streak: 0,
   });
 
-
   const {
     register,
     handleSubmit,
@@ -143,9 +142,7 @@ export default function Dashboard() {
 
       // Fallback to Clerk’s user email if data.email is blank
       const emailToSend =
-        data.email?.trim() ||
-        user?.primaryEmailAddress?.emailAddress ||
-        "";
+        data.email?.trim() || user?.primaryEmailAddress?.emailAddress || "";
       formData.append("email", emailToSend);
 
       formData.append("result", data.result);
@@ -174,7 +171,6 @@ export default function Dashboard() {
       await fetchStats();
 
       // TODO: refetch history/stats here if desired
-
     } catch (error: any) {
       console.error("Error submitting ATK result:", error);
       toast.error(error.message || "Failed to submit. Please try again.");
@@ -204,7 +200,6 @@ export default function Dashboard() {
     );
     if (res.ok) setStats(await res.json());
   };
-
 
   return (
     <div className="container mx-auto py-6 space-y-6 min-h-screen pt-24">
@@ -599,7 +594,6 @@ export default function Dashboard() {
                 </p>
               </CardContent>
             </Card>
-
 
             <Card>
               <CardHeader className="pb-2">

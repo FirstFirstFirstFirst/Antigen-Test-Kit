@@ -23,7 +23,6 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Filter,
   Calendar,
-  ArrowUpDown,
   RefreshCcw,
   Users,
   AlertTriangle,
@@ -51,6 +50,7 @@ import { endOfWeek, format, startOfWeek } from "@/lib/format";
 import { exportToExcel, exportToPDF } from "@/lib/report";
 import { TrendsTabContent } from "@/components/trends-tab-content";
 import { ExportDropdown } from "@/components/export-dropdown";
+import { toast } from "sonner";
 
 // // Generate mock data and calculate weekly stats
 // const mockSubmissions: Submission[] = generateMockData(100);
@@ -86,11 +86,10 @@ export default function AdminReportPage() {
     },
   });
 
-
   // fetch real data on mount
   useEffect(() => {
     fetch("/api/admin/atk-results")
-      .then(res => res.json())
+      .then((res) => res.json())
       .then((payload) => {
         setSubmissions(payload.submissions);
         setStats(payload.stats);
@@ -105,13 +104,16 @@ export default function AdminReportPage() {
     endDate,
     "MMM d, yyyy"
   )}`;
-  
+
   // compute cut-offs for today, this week and this month
   const now = new Date();
-  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfToday = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate()
+  );
   const startOfThisWeek = startOfWeek(now);
   const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-
 
   // Filter submissions based on dateRange, then search+status
   const filteredSubmissions = submissions.filter((sub) => {
@@ -154,7 +156,7 @@ export default function AdminReportPage() {
       }
 
       setIsExporting(false);
-      alert(`Report exported as ${fileName}`);
+      toast.success(`Report exported as ${fileName}`);
     }, 1000);
   };
 
@@ -331,10 +333,7 @@ export default function AdminReportPage() {
                     <TableHead>Student</TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead>
-                      <div className="flex items-center">
-                        Date
-                        <ArrowUpDown className="ml-2 h-4 w-4" />
-                      </div>
+                      <div className="flex items-center">Date</div>
                     </TableHead>
                     <TableHead>Result</TableHead>
                     <TableHead>Status</TableHead>
@@ -357,7 +356,6 @@ export default function AdminReportPage() {
                                   .map((n: string) => n[0])
                                   .join("")}
                               </AvatarFallback>
-
                             </Avatar>
                             <div>
                               <p className="text-sm font-medium">

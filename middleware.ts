@@ -7,23 +7,25 @@ const isPublicRoute = createRouteMatcher([
   "/api/webhooks/clerk",
 ]);
 
-const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
+const isReportRoute = createRouteMatcher(["/report(.*)"]);
 
 export default clerkMiddleware(async (auth, req) => {
-  if (isAdminRoute(req)) {
-    // if (!auth().userId) {
-    if (!auth()) {
-      // Redirect to sign-in page with return_to parameter
+  const authData = await auth();
+  if (isReportRoute(req)) {
+    if (!authData) {
       const signInUrl = new URL("/sign-in", req.url);
       signInUrl.searchParams.set("redirect_url", req.url);
       return NextResponse.redirect(signInUrl);
     }
 
-    // Your admin check logic would go here
-    // For now, we're just authenticating without checking admin status
+    // Check for admin
+    if (authData.orgRole !== "org:admin") {
+      // Redirect non-admin users to homepage or access denied page
+      return NextResponse.redirect(new URL("/", req.url));
+    }
   } else if (!isPublicRoute(req)) {
     // if (!auth().userId) {
-    if (!auth()) {
+    if (!authData) {
       // Redirect to sign-in page with return_to parameter
       const signInUrl = new URL("/sign-in", req.url);
       signInUrl.searchParams.set("redirect_url", req.url);

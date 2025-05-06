@@ -40,7 +40,7 @@ export function endOfWeek(date: Date): Date {
  */
 
 export function format(date: Date, pattern: string): string {
-  console.log("params", date, pattern);
+  // console.log("params", date, pattern);
   // Handle months
   if (pattern.includes("MMM")) {
     const monthNames = [
@@ -63,7 +63,7 @@ export function format(date: Date, pattern: string): string {
     pattern = pattern.replace("MM", month < 10 ? `0${month}` : `${month}`);
 
   }
-  console.log("pattern month", pattern);
+  // console.log("pattern month", pattern);
 
   // Handle days
   if (pattern.includes("dd")) {
@@ -72,7 +72,7 @@ export function format(date: Date, pattern: string): string {
   } else if (pattern.includes("d")) {
     pattern = pattern.replace("d", date.getDate().toString());
   }
-  console.log("pattern day", pattern);
+  // console.log("pattern day", pattern);
 
   // Handle years
   if (pattern.includes("yyyy")) {
@@ -80,7 +80,7 @@ export function format(date: Date, pattern: string): string {
   } else if (pattern.includes("yy")) {
     pattern = pattern.replace("yy", date.getFullYear().toString().slice(-2));
   }
-  console.log("pattern year", pattern);
+  // console.log("pattern year", pattern);
 
   // Handle hours (12-hour format)
   if (pattern.includes("h:")) {
@@ -88,7 +88,7 @@ export function format(date: Date, pattern: string): string {
     hours = hours === 0 ? 12 : hours; // Convert 0 to 12 for 12-hour format
     pattern = pattern.replace("h", hours.toString());
   }
-  console.log("pattern hour", pattern);
+  // console.log("pattern hour", pattern);
 
   // Handle minutes
   if (pattern.includes(":mm")) {
@@ -98,14 +98,14 @@ export function format(date: Date, pattern: string): string {
       minutes < 10 ? `0${minutes}` : `${minutes}`
     );
   }
-  console.log("pattern minute", pattern);
+  // console.log("pattern minute", pattern);
 
   // Handle AM/PM
   if (pattern.includes("aa")) {
     const ampm = date.getHours() >= 12 ? "PM" : "AM";
     pattern = pattern.replace("aa", ampm);
   }
-  console.log("pattern ampm", pattern);
+  // console.log("pattern ampm", pattern);
 
   return pattern;
 }

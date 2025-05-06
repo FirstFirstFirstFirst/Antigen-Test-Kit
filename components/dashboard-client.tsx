@@ -54,10 +54,11 @@ import { toast } from "sonner";
 import { SubmissionHistory, Stats } from "./dashboard-server";
 
 interface DashboardClientProps {
-  initialSubmissionHistory: SubmissionHistory;
-  initialStats: Stats;
-  userEmail: string | undefined;
+  initialSubmissionHistory: SubmissionHistory; // now matches the server export
+  initialStats:            Stats;
+  userEmail:               string;
 }
+
 
 export default function DashboardClient({
   initialSubmissionHistory,
@@ -472,7 +473,7 @@ export default function DashboardClient({
                           <TableCell className="font-medium">
                             {format(date, "MMM d, yyyy")}
                           </TableCell>
-                          <TableCell>{format(date, "h:mm a")}</TableCell>
+                          <TableCell>{format(date, "h:mm aa")}</TableCell>
                           <TableCell>
                             <Badge
                               variant={
@@ -562,7 +563,7 @@ export default function DashboardClient({
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
                   {stats.lastSubmission
-                    ? format(new Date(stats.lastSubmission), "h:mm a")
+                    ? format(new Date(stats.lastSubmission), "h:mm aa")
                     : ""}
                 </p>
               </CardContent>

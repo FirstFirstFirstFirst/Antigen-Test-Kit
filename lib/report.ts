@@ -75,7 +75,7 @@ export function exportToExcel(submissions: Submission[]) {
     Name: sub.name,
     Email: sub.email,
     Date: format(new Date(sub.date), "yyyy-MM-dd"),
-    Time: format(new Date(sub.date), "h:mm a"),
+    Time: format(new Date(sub.date), "h:mm aa"),
     Result: sub.result,
     Status: sub.verified ? "Verified" : "Pending",
   }));

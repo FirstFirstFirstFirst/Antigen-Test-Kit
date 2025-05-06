@@ -371,7 +371,7 @@ export default function AdminReportPage() {
                               {format(submissionDate, "MMM d, yyyy")}
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              {format(submissionDate, "h:mm a")}
+                              {format(submissionDate, "h:mm aa")}
                             </p>
                           </div>
                         </TableCell>

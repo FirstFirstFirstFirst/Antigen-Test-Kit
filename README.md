@@ -2,8 +2,6 @@
 
 A comprehensive web application for university students to self-report Antigen Test Kit (ATK) results, with administrative features for monitoring and analyzing submission data.
 
-![ATK Reporting System](https://res.cloudinary.com/demo/image/upload/v1/atk-reporting-system)
-
 ## Project Overview
 
 The ATK Reporting System is designed to streamline the process of collecting and managing COVID-19 antigen test results within a university setting. The system allows students to submit their test results with supporting images, while providing administrators with tools to monitor submissions, analyze trends, and generate reports.
@@ -159,7 +157,7 @@ Quick start:
 docker-compose up -d
 
 # Access the application
-# http://localhost:3001
+# http://localhost:3000
 ```
 
 ## Configuration Options

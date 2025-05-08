@@ -1,17 +1,11 @@
 version: '3.8'
 
 services:
-  db:
-    image: postgres:14
+  web:
+    # The image supports both AMD64 and ARM64 architectures
+    image: likesloth/atk:v3
     restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: antigendb
     ports:
-      - "5432:5432"
-    volumes:
-      - db_data:/var/lib/postgresql/data
-
-volumes:
-  db_data:
+      - "3001:3000"
+    env_file:
+      - .env

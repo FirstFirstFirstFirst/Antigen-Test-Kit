@@ -54,4 +54,4 @@ If you encounter any issues:
    docker compose logs
    ```
 
-For any additional assistance, please contact the development team via email http://mailto:s6530613022@phuket.psu.ac.th.
+For any additional assistance, please contact the development team via email s6530613022@phuket.psu.ac.th.

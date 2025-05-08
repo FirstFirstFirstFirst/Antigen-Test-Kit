@@ -30,13 +30,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 1) Find user
+    // Find user in the database
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // 2) Prevent 24h duplicate
+    // Check for duplicate submissions within the last 24 hours
     const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
     const recent = await prisma.aTKResult.findFirst({
       where: { userId: user.id, createdAt: { gt: cutoff } }

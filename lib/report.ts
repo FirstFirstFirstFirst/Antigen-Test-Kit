@@ -97,8 +97,10 @@ export function exportToExcel(submissions: Submission[]) {
 }
 
 export function exportToPDF(submissions: Submission[], stats: WeeklyStats) {
-  // Create new PDF document
-  const doc = new jsPDF();
+  // Create new PDF document with landscape orientation for more width
+  const doc = new jsPDF({
+    orientation: 'landscape',
+  });
 
   // Add title
   doc.setFontSize(18);
@@ -135,12 +137,14 @@ export function exportToPDF(submissions: Submission[], stats: WeeklyStats) {
   let y = 100;
 
   doc.setFillColor(240, 240, 240);
-  doc.rect(14, y - 5, 180, 8, "F");
+  doc.rect(14, y - 5, 280, 8, "F");
 
   doc.setFontSize(10);
+  // Define column positions with better spacing for all columns
+  const columnPositions = [14, 80, 150, 210, 250, 280];
+
   headers.forEach((header, i) => {
-    const x = 14 + i * 30;
-    doc.text(header, x, y);
+    doc.text(header, columnPositions[i], y);
   });
 
   y += 8;
@@ -156,12 +160,18 @@ export function exportToPDF(submissions: Submission[], stats: WeeklyStats) {
       y = 20;
     }
 
-    doc.text(sub.id.toString(), 14, y);
-    doc.text(sub.name.substring(0, 15), 44, y);
-    doc.text(sub.email.substring(0, 15), 74, y);
-    doc.text(format(new Date(sub.date), "yyyy-MM-dd"), 104, y);
-    doc.text(sub.result, 134, y);
-    doc.text(sub.verified ? "Verified" : "Pending", 164, y);
+    // Truncate long IDs to prevent overlapping
+    const truncatedId = sub.id.toString().length > 20
+      ? sub.id.toString().substring(0, 20) + "..."
+      : sub.id.toString();
+    doc.text(truncatedId, columnPositions[0], y);
+
+    // Allow more characters for name and email
+    doc.text(sub.name.substring(0, 25), columnPositions[1], y);
+    doc.text(sub.email.substring(0, 30), columnPositions[2], y);
+    doc.text(format(new Date(sub.date), "yyyy-MM-dd"), columnPositions[3], y);
+    doc.text(sub.result, columnPositions[4], y);
+    doc.text(sub.verified ? "Verified" : "Pending", columnPositions[5], y);
 
     y += 7;
   }

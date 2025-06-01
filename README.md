@@ -38,7 +38,7 @@ The ATK Reporting System is designed to streamline the process of collecting and
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/yourusername/atk-reporting-system.git
+   git clone https://github.com/FirstFirstFirstFirst/Antigen-Test-Kit.git
    cd atk-reporting-system
    ```
 
@@ -96,16 +96,16 @@ The ATK Reporting System is designed to streamline the process of collecting and
 
 The application requires the following environment variables:
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `DATABASE_URL` | PostgreSQL connection string | Yes |
-| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk public key | Yes |
-| `CLERK_SECRET_KEY` | Clerk secret key | Yes |
-| `GOOGLE_CLIENT_ID` | Google API client ID | Yes |
-| `GOOGLE_CLIENT_SECRET` | Google API client secret | Yes |
-| `GOOGLE_REDIRECT_URI` | OAuth redirect URI | Yes |
-| `GOOGLE_REFRESH_TOKEN` | Google API refresh token | Yes |
-| `GOOGLE_DRIVE_FOLDER` | Google Drive folder ID for storing images | Yes |
+| Variable                            | Description                               | Required |
+| ----------------------------------- | ----------------------------------------- | -------- |
+| `DATABASE_URL`                      | PostgreSQL connection string              | Yes      |
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk public key                          | Yes      |
+| `CLERK_SECRET_KEY`                  | Clerk secret key                          | Yes      |
+| `GOOGLE_CLIENT_ID`                  | Google API client ID                      | Yes      |
+| `GOOGLE_CLIENT_SECRET`              | Google API client secret                  | Yes      |
+| `GOOGLE_REDIRECT_URI`               | OAuth redirect URI                        | Yes      |
+| `GOOGLE_REFRESH_TOKEN`              | Google API refresh token                  | Yes      |
+| `GOOGLE_DRIVE_FOLDER`               | Google Drive folder ID for storing images | Yes      |
 
 ## Database Setup
 
